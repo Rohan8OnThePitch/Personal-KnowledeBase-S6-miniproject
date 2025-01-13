@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 from docx import Document
 from PyPDF2 import PdfReader  # Example for PDF files
+import preprocess
 
 app = Flask(__name__)
 
@@ -52,7 +53,8 @@ def upload_file():
             if callable(processor_function):
                 try:
                     extracted_text = processor_function(file_path)
-                    return jsonify({"text": extracted_text})
+                    preprocessed_text = preprocess.preprocess_text(extracted_text)
+                    return jsonify({"text": preprocessed_text})
                 except Exception as e:
                     return jsonify({"error": str(e)}), 500
             else:
