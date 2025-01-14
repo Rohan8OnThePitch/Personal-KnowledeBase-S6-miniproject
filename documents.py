@@ -1,7 +1,4 @@
-import nltk
-import preprocess
-print("Libraries installed successfully!")
-'''from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import os
 from docx import Document
@@ -10,10 +7,9 @@ import preprocess
 
 app = Flask(__name__)
 
-
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'docx', 'pdf'}
+ALLOWED_EXTENSIONS = {'docx', 'pdf','txt'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
@@ -22,7 +18,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Dictionary mapping file types to processing functions
 FILE_PROCESSORS = {
     'docx': 'process_docx_file',
-    'pdf': 'process_pdf_file'
+    'pdf': 'process_pdf_file',
+    'txt':'process_txt_file'
 }
 
 # Helper function to check file extension
@@ -90,4 +87,4 @@ def process_txt_file(file_path):
         return f"Error: {e}" 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)'''
+    app.run(debug=True)
