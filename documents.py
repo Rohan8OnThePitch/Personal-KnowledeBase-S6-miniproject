@@ -1,4 +1,7 @@
-from flask import Flask, request, render_template, jsonify
+import nltk
+import preprocess
+print("Libraries installed successfully!")
+'''from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import os
 from docx import Document
@@ -6,6 +9,7 @@ from PyPDF2 import PdfReader  # Example for PDF files
 import preprocess
 
 app = Flask(__name__)
+
 
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
@@ -86,4 +90,4 @@ def process_txt_file(file_path):
         return f"Error: {e}" 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True)'''
