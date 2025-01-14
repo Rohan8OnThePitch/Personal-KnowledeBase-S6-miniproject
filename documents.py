@@ -3,12 +3,12 @@ from werkzeug.utils import secure_filename
 import os
 from docx import Document
 from PyPDF2 import PdfReader  # Example for PDF files
-
+import sys
 app = Flask(__name__)
 
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'docx', 'pdf'}
+ALLOWED_EXTENSIONS = {'docx', 'pdf','txt'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
@@ -17,7 +17,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Dictionary mapping file types to processing functions
 FILE_PROCESSORS = {
     'docx': 'process_docx_file',
-    'pdf': 'process_pdf_file'
+    'pdf': 'process_pdf_file',
+    'txt':'process_txt_file'
 }
 
 # Helper function to check file extension
@@ -73,6 +74,15 @@ def process_pdf_file(file_path):
     for page in reader.pages:
         text += page.extract_text() + "\n"
     return text.strip()
+def process_txt_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = "\n".join([line.strip() for line in file])
+        return text.strip()
+    except FileNotFoundError:
+        return "Error: File not found."
+    except Exception as e:
+        return f"Error: {e}" 
 
 # Run the app
 if __name__ == '__main__':
