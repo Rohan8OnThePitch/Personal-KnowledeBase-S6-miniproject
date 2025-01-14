@@ -75,7 +75,15 @@ def process_pdf_file(file_path):
     for page in reader.pages:
         text += page.extract_text() + "\n"
     return text.strip()
-
+def process_txt_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = "\n".join([line.strip() for line in file])
+        return text.strip()
+    except FileNotFoundError:
+        return "Error: File not found."
+    except Exception as e:
+        return f"Error: {e}" 
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True)
