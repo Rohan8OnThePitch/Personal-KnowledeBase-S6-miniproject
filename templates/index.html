@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Upload DOCX</title>
-</head>
-<body>
-    <h1>Upload a DOCX File</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Upload</button>
+  </head>
+  <body>
+    <h1>Upload a File (.docx, .txt, .pdf)</h1>
+    <form
+      action="/upload"
+      method="post"
+      enctype="multipart/form-data">
+      <input
+        type="file"
+        name="file" />
+      <button type="submit">Upload</button>
     </form>
-</body>
+  </body>
 </html>

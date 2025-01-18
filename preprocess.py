@@ -3,11 +3,29 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
+import os
 
 # Download NLTK resources (if not already downloaded)
-'''nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')'''
+# Specify the directory where you want to save the NLTK data
+import argparse
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Preprocess text data.')
+parser.add_argument('--nltk_data_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'nltk_data'),
+                    help='Directory to save NLTK data')
+args = parser.parse_args()
+
+nltk_data_dir = args.nltk_data_dir
+
+# Ensure the directory exists
+os.mkdir(nltk_data_dir)
+
+# Append the NLTK data directory to the NLTK data path
+# Append the NLTK data directory to the NLTK data path to ensure NLTK can find the downloaded data
+nltk.data.path.append(nltk_data_dir)
+
+nltk.download(['punkt', 'stopwords', 'wordnet', 'omw-1.4'], download_dir=nltk_data_dir)
+nltk.download('omw-1.4', download_dir=nltk_data_dir)
 
 # Initialize lemmatizer and stopwords
 lemmatizer = WordNetLemmatizer()
