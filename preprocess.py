@@ -3,29 +3,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-import os
 
-# Download NLTK resources (if not already downloaded)
-# Specify the directory where you want to save the NLTK data
-import argparse
-
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description='Preprocess text data.')
-parser.add_argument('--nltk_data_dir', type=str, default=os.path.join(os.path.dirname(__file__), 'nltk_data'),
-                    help='Directory to save NLTK data')
-args = parser.parse_args()
-
-nltk_data_dir = args.nltk_data_dir
-
-# Ensure the directory exists
-os.mkdir(nltk_data_dir)
-
-# Append the NLTK data directory to the NLTK data path
-# Append the NLTK data directory to the NLTK data path to ensure NLTK can find the downloaded data
-nltk.data.path.append(nltk_data_dir)
-
-nltk.download(['punkt', 'stopwords', 'wordnet', 'omw-1.4'], download_dir=nltk_data_dir)
-nltk.download('omw-1.4', download_dir=nltk_data_dir)
 
 # Initialize lemmatizer and stopwords
 lemmatizer = WordNetLemmatizer()
@@ -36,22 +14,28 @@ def preprocess_text(text):
     # Convert text to lowercase
     text = text.lower()
 
-    # Remove non-ASCII characters (optional)
-    text = ''.join(char for char in text if ord(char) < 128)
+    # Normalize line breaks and remove unnecessary spaces
+    text = re.sub(r'\s+', ' ', text.strip())
 
-    # Remove any special characters, numbers, or unwanted symbols
-    text = re.sub(r'[^a-z\s]', '', text)
+    # Split alphanumeric combinations (e.g., "hello1234world" -> "hello 1234 world")
+    text = re.sub(r'([a-zA-Z]+)(\d+)', r'\1 \2', text)
+    text = re.sub(r'(\d+)([a-zA-Z]+)', r'\1 \2', text)
 
-    # Tokenize the text
-    words = word_tokenize(text)
+    # Tokenize the text into words, numbers, and special characters
+    tokens = word_tokenize(text)
 
-    # Remove stopwords and lemmatize
-    cleaned_text = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    # Process tokens: lemmatize words, keep numbers and special characters
+    cleaned_tokens = []
+    for token in tokens:
+        if token.isalpha() and token not in stop_words:  # Alphabetic words
+            cleaned_tokens.append(lemmatizer.lemmatize(token))
+        elif token.isnumeric():  # Numbers
+            cleaned_tokens.append(token)
+        elif not token.isalnum():  # Special characters
+            cleaned_tokens.append(token)
 
-    # Join the words back into a string
-    return ' '.join(cleaned_text)
+    # Join the tokens back into a single string
+    return ' '.join(cleaned_tokens)
 
-# Example usage
-raw_text = "This is an example sentence with some noisy data! Running..."
-processed_text = preprocess_text(raw_text)
-print(processed_text)  # Output will be clean, tokenized text without stopwords
+
+
