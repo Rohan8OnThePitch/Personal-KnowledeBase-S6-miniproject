@@ -10,3 +10,4 @@ dependencies:
       - python-docx==0.8.11
       - PyPDF2==3.0.1
       - nltk==3.6.7
+      - PyMuPDF==1.25.2
