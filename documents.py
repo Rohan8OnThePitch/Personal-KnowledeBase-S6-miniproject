@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import os
 from docx import Document
-from PyPDF2 import PdfReader  # Example for PDF files
 import fitz  # PyMuPDF
 import io
 import base64
@@ -13,7 +12,6 @@ app = Flask(__name__)
 
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'docx', 'pdf','txt'}
 ALLOWED_EXTENSIONS = {'docx', 'pdf', 'txt'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -24,8 +22,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 FILE_PROCESSORS = {
     'docx': 'process_docx_file',
     'pdf': 'process_pdf_file',
-
-    'txt':'process_txt_file'
+    'txt': 'process_txt_file'
 }
 
 # Helper function to check file extension
@@ -59,9 +56,6 @@ def upload_file():
             processor_function = globals().get(processor_function_name)
             if callable(processor_function):
                 try:
-                    extracted_text = processor_function(file_path)
-                    preprocessed_text = preprocess.preprocess_text(extracted_text)
-                    return jsonify({"text": preprocessed_text})
                     extracted_data = processor_function(file_path)
                     preprocessed_text = preprocess.preprocess_text(extracted_data['text'])
                     return jsonify({"text": preprocessed_text, "images": extracted_data['images']})
@@ -81,9 +75,6 @@ def process_docx_file(file_path):
 # Function to process PDF files
 def process_pdf_file(file_path):
     text = ""
-    for page in reader.pages:
-        text += page.extract_text() + "\n"
-    return text.strip()
     images = []  # List to store image data
 
     # Open the PDF file using PyMuPDF
@@ -128,11 +119,6 @@ def process_txt_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             text = "\n".join([line.strip() for line in file])
-        return text.strip()
-    except FileNotFoundError:
-        return "Error: File not found."
-    except Exception as e:
-        return f"Error: {e}" 
         return {"text": text.strip(), "images": []}  # No images for txt files
     except FileNotFoundError:
         return {"text": "Error: File not found.", "images": []}
