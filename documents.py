@@ -2,25 +2,19 @@ from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import os
 from docx import Document
-<<<<<<< HEAD
 from PyPDF2 import PdfReader  # Example for PDF files
-=======
 import fitz  # PyMuPDF
 import io
 import base64
 from PIL import Image
->>>>>>> Development
 import preprocess
 
 app = Flask(__name__)
 
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
-<<<<<<< HEAD
 ALLOWED_EXTENSIONS = {'docx', 'pdf','txt'}
-=======
 ALLOWED_EXTENSIONS = {'docx', 'pdf', 'txt'}
->>>>>>> Development
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
@@ -30,11 +24,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 FILE_PROCESSORS = {
     'docx': 'process_docx_file',
     'pdf': 'process_pdf_file',
-<<<<<<< HEAD
+
     'txt':'process_txt_file'
-=======
-    'txt': 'process_txt_file'
->>>>>>> Development
 }
 
 # Helper function to check file extension
@@ -68,15 +59,12 @@ def upload_file():
             processor_function = globals().get(processor_function_name)
             if callable(processor_function):
                 try:
-<<<<<<< HEAD
                     extracted_text = processor_function(file_path)
                     preprocessed_text = preprocess.preprocess_text(extracted_text)
                     return jsonify({"text": preprocessed_text})
-=======
                     extracted_data = processor_function(file_path)
                     preprocessed_text = preprocess.preprocess_text(extracted_data['text'])
                     return jsonify({"text": preprocessed_text, "images": extracted_data['images']})
->>>>>>> Development
                 except Exception as e:
                     return jsonify({"error": str(e)}), 500
             else:
@@ -93,11 +81,9 @@ def process_docx_file(file_path):
 # Function to process PDF files
 def process_pdf_file(file_path):
     text = ""
-<<<<<<< HEAD
     for page in reader.pages:
         text += page.extract_text() + "\n"
     return text.strip()
-=======
     images = []  # List to store image data
 
     # Open the PDF file using PyMuPDF
