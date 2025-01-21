@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload DOCX</title>
+    <style>
+      /* Ensure the extracted text appears on multiple lines and retains formatting */
+      #extracted-text {
+        white-space: pre-wrap; /* Allows the text to wrap */
+        word-wrap: break-word; /* Ensures long words break and don't overflow */
+        max-width: 100%; /* Ensure it doesn't stretch off the page */
+        overflow-wrap: break-word; /* Breaks words to fit the container */
+      }
+      #image-container img {
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upload a File (.docx, .txt, .pdf)</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" />
+      <button type="submit">Upload</button>
+    </form>
+
+    <!-- Display the processed text and images here -->
+    <div id="result">
+      <h2>Extracted Text</h2>
+      <pre id="extracted-text"></pre>
+      <h2>Extracted Images</h2>
+      <div id="image-container"></div>
+    </div>
+
+    <hr />
+
+    <h2>Query Document</h2>
+    <form id="query-form">
+      <input type="text" id="query-text" placeholder="Enter your query" />
+      <button type="submit">Search</button>
+    </form>
+
+    <!-- Display query results -->
+    <div id="query-result">
+      <h3>Query Results</h3>
+      <pre id="query-results"></pre>
+    </div>
+
+    <script>
+      // Function to handle the file upload and display the result
+      document.querySelector("form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let formData = new FormData(this);
+        
+        fetch("/upload", {
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Display the extracted text
+          document.getElementById("extracted-text").textContent = data.text || "No text extracted.";
+          
+          // Display the extracted images
+          let imageContainer = document.getElementById("image-container");
+          imageContainer.innerHTML = ''; // Clear any previous images
+
+          if (data.images && data.images.length > 0) {
+            data.images.forEach(image => {
+              let imgElement = document.createElement("img");
+              imgElement.src = "data:image/png;base64," + image.image_data;
+              imgElement.alt = `Image on page ${image.page}`;
+              imgElement.style.width = "200px"; // Optional: control the image size
+              imageContainer.appendChild(imgElement);
+            });
+          } else {
+            imageContainer.textContent = "No images extracted.";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+      });
+
+      // Function to handle querying the document
+      document.getElementById("query-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const queryText = document.getElementById("query-text").value;
+
+        if (!queryText) {
+          alert("Please enter a query.");
+          return;
+        }
+
+        fetch("/query", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: queryText }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Display the query results
+          document.getElementById("query-results").textContent = JSON.stringify(data.results, null, 2);
+        })
+        .catch(error => {
+          console.error("Error:", error);
+        });
+      });
+    </script>
+  </body>
+</html>
