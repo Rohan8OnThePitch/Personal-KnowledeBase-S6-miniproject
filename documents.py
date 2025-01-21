@@ -124,25 +124,21 @@ def process_pdf_file(file_path):
     return {"text": text.strip(), "images": images}
 
 # Function to process TXT files
->>>>>>> Development
 def process_txt_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             text = "\n".join([line.strip() for line in file])
-<<<<<<< HEAD
         return text.strip()
     except FileNotFoundError:
         return "Error: File not found."
     except Exception as e:
         return f"Error: {e}" 
-=======
         return {"text": text.strip(), "images": []}  # No images for txt files
     except FileNotFoundError:
         return {"text": "Error: File not found.", "images": []}
     except Exception as e:
         return {"text": f"Error: {e}", "images": []}
 
->>>>>>> Development
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True)
