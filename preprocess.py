@@ -4,13 +4,10 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-<<<<<<< HEAD
 # Download NLTK resources (if not already downloaded)
 '''nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')'''
-=======
->>>>>>> Development
 
 # Initialize lemmatizer and stopwords
 lemmatizer = WordNetLemmatizer()
@@ -21,7 +18,6 @@ def preprocess_text(text):
     # Convert text to lowercase
     text = text.lower()
 
-<<<<<<< HEAD
     # Remove non-ASCII characters (optional)
     text = ''.join(char for char in text if ord(char) < 128)
 
@@ -41,7 +37,6 @@ def preprocess_text(text):
 raw_text = "This is an example sentence with some noisy data! Running..."
 processed_text = preprocess_text(raw_text)
 print(processed_text)  # Output will be clean, tokenized text without stopwords
-=======
     # Normalize line breaks and remove unnecessary spaces
     text = re.sub(r'\s+', ' ', text.strip())
 
@@ -67,4 +62,3 @@ print(processed_text)  # Output will be clean, tokenized text without stopwords
 
 
 
->>>>>>> Development
