@@ -10,7 +10,6 @@ import preprocess
 import json
 import os
 from openpyxl import load_workbook
-import xlrd
 import yaml
 import csv
 
