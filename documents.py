@@ -12,7 +12,6 @@ import os
 from openpyxl import load_workbook
 import yaml
 import csv
-
 app = Flask(__name__)
 
 # Set the upload folder and allowed file extensions
