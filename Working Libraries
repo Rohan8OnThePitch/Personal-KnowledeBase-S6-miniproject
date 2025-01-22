@@ -1,0 +1,7 @@
+ Flask - for web apps
+Werkzeug - for file handling
+python-docx
+PyMuPDF
+Pillow - for handling images
+openpyxl - for handling xlsx files
+PyYAML
