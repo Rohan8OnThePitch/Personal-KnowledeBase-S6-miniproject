@@ -7,12 +7,18 @@ import io
 import base64
 from PIL import Image
 import preprocess
+import json
+import os
+from openpyxl import load_workbook
+import xlrd
+import yaml
+import csv
 
 app = Flask(__name__)
 
 # Set the upload folder and allowed file extensions
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'docx', 'pdf', 'txt'}
+ALLOWED_EXTENSIONS = {'docx', 'pdf', 'txt','csv','xlsx','json','py','java','js','html','css','cpp','cs','yaml','ts'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
@@ -22,7 +28,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 FILE_PROCESSORS = {
     'docx': 'process_docx_file',
     'pdf': 'process_pdf_file',
-    'txt': 'process_txt_file'
+    'txt': 'process_txt_file',
+    'csv': 'process_csv_file',
+    'xlsx':'process_excel_file',
+    'json':'process_json_file',
+    'py':'process_python_file',
+    'java':'process_java_file',
+    'js':'process_javascript_file',
+    'html':'process_html_file',
+    'css':'process_css_file',
+    'cpp':'process_cpp_file',
+    'cs':'process_cs_file',
+    'yaml':'process_yaml_file',
+    'ts':'process_ts_file'
+
 }
 
 # Helper function to check file extension
@@ -124,6 +143,195 @@ def process_txt_file(file_path):
         return {"text": "Error: File not found.", "images": []}
     except Exception as e:
         return {"text": f"Error: {e}", "images": []}
+        
+        
+#.csv files
+def process_csv_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            text = "\n".join([", ".join(row) for row in reader])
+        return {"text": text.strip(), "images": []}  # No images for CSV files
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+
+#.xlsx files
+def process_excel_file(file_path):
+    try:
+        text = ""
+        file_extension = os.path.splitext(file_path)[1].lower()
+
+        if file_extension == ".xlsx":
+            # Process .xlsx files using openpyxl
+            workbook = load_workbook(file_path, data_only=True)
+            for sheet in workbook.worksheets:
+                # Extract text from the sheet
+                for row in sheet.iter_rows(values_only=True):
+                    row_text = ", ".join([str(cell) if cell is not None else "" for cell in row])
+                    text += row_text + "\n"
+
+
+        else:
+            return {"text": "Error: Unsupported file format.", "images": []}
+
+        return {"text": text.strip(), "images": []}
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+
+#.json files
+def process_json_file(file_path):
+    try:
+        # Read and parse the JSON file
+        with open(file_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        
+        # Convert JSON data to a pretty-printed string
+        text = json.dumps(data, indent=4, ensure_ascii=False)
+        
+        return {"text": text.strip(), "images": []}  # No images for JSON files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except json.JSONDecodeError:
+        return {"text": "Error: Invalid JSON format.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.python files
+def process_python_file(file_path):
+    try:
+        # Read the Python file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for Python files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.java files
+def process_java_file(file_path):
+    try:
+        # Read the Java file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for Java files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.js files
+def process_javascript_file(file_path):
+    try:
+        # Read the JavaScript file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for JavaScript files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.html files
+def process_html_file(file_path):
+    try:
+        # Read the HTML file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for HTML files (only references)
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.css files
+def process_css_file(file_path):
+    try:
+        # Read the CSS file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for CSS files (only references)
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+        
+#.cpp files
+def process_cpp_file(file_path):
+    try:
+        # Read the C++ file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for C++ files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+
+#.cs files
+def process_cs_file(file_path):
+    try:
+        # Read the C# file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for C# files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+
+#.ts files
+def process_ts_file(file_path):
+    try:
+        # Read the TypeScript file
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = file.read()
+
+        return {"text": text.strip(), "images": []}  # No images for TypeScript files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+#.yaml files
+def process_yaml_file(file_path):
+    try:
+        # Read and load the YAML file
+        with open(file_path, "r", encoding="utf-8") as file:
+            data = yaml.safe_load(file)
+
+        # Convert YAML data to a pretty-printed string
+        text = yaml.dump(data, default_flow_style=False, allow_unicode=True)
+
+        return {"text": text.strip(), "images": []}  # No images for YAML files
+
+    except FileNotFoundError:
+        return {"text": "Error: File not found.", "images": []}
+    except yaml.YAMLError:
+        return {"text": "Error: Invalid YAML format.", "images": []}
+    except Exception as e:
+        return {"text": f"Error: {e}", "images": []}
+
 
 # Run the app
 if __name__ == '__main__':
