@@ -1,0 +1,87 @@
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 720-731-266
+INFO:werkzeug: * Detected change in 'D:\\trying\\app.py', reloading
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 720-731-266
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:40:59] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:41:11] "[35m[1mPOST /upload HTTP/1.1[0m" 500 -
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 720-731-266
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:45:52] "POST /upload HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:45:52] "POST /upload HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:45:52] "POST /upload HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:45:52] "POST /upload HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:46:06] "POST /upload HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: POST http://localhost:6333/collections/documents/points/search "HTTP/1.1 200 OK"
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:46:15] "POST /query HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: POST http://localhost:6333/collections/documents/points/search "HTTP/1.1 200 OK"
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:46:17] "POST /query HTTP/1.1" 200 -
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:sentence_transformers.SentenceTransformer:Use pytorch device_name: cuda
+INFO:sentence_transformers.SentenceTransformer:Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 720-731-266
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:58:23] "GET / HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:58:27] "POST /upload HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: POST http://localhost:6333/collections/documents/points/search "HTTP/1.1 200 OK"
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:58:34] "POST /query HTTP/1.1" 200 -
+INFO:httpx:HTTP Request: GET http://localhost:6333/collections "HTTP/1.1 200 OK"
+INFO:root:Collection 'documents' already exists.
+INFO:httpx:HTTP Request: PUT http://localhost:6333/collections/documents/points?wait=true "HTTP/1.1 400 Bad Request"
+ERROR:root:Error indexing document 'NLP.docx': Unexpected Response: 400 (Bad Request)
+Raw response content:
+b'{"status":{"error":"Format error in JSON body: value NLP.docx_0 is not a valid point ID, valid values are either an unsigned integer or a UUID"},"time":0.0}'
+INFO:werkzeug:127.0.0.1 - - [22/Jan/2025 20:59:13] "POST /upload HTTP/1.1" 200 -

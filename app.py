@@ -26,18 +26,21 @@ def upload_file():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(file_path)
 
-    # Process file
+    # Process file into chunks
     if file.filename.endswith('.docx'):
-        text = process_docx(file_path)
+        chunks = process_docx(file_path)
     elif file.filename.endswith('.pdf'):
-        text = process_pdf(file_path)
+        chunks = process_pdf(file_path)
     elif file.filename.endswith('.txt'):
-        text = process_txt(file_path)
+        chunks = process_txt(file_path)
     else:
         return jsonify({"error": "Unsupported file type"}), 400
-        preprocessed_text = preprocess.preprocess_text(text['text'])
-    # Index the document and get the result
-    result = index_document("documents", file.filename,preprocessed_text)
+
+    # Preprocess each chunk (if needed)
+    preprocessed_chunks = [preprocess.preprocess_text(chunk) for chunk in chunks]
+
+    # Index the document chunks
+    result = index_document("documents", file.filename, preprocessed_chunks,batch_size=50)
 
     # Ensure the response is JSON serializable and return it
     return jsonify(result)
@@ -48,8 +51,10 @@ def query():
     if not query_text:
         return jsonify({"error": "Query cannot be empty"}), 400
 
-    results = query_documents("documents", query_text)
-    #print(results)
+    # Optional: Get score_threshold from the request (default to 0.5)
+    score_threshold = request.json.get('score_threshold', 0.5)
+    preproquery=preprocess.preprocess_text(query_text)
+    results = query_documents("documents", preproquery, score_threshold=score_threshold)
     return jsonify(results)
 
 if __name__ == '__main__':
