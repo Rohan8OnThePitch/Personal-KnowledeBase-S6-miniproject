@@ -1,18 +1,32 @@
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import VectorParams
+from qdrant_client.http.models import VectorParams, Distance
+import os
 
-# Connect to the local Qdrant instance
-client = QdrantClient(url="http://localhost:6333")
+# Connect to the local Qdrant instance (using environment variables)
+QDRANT_HOST = os.environ.get("QDRANT_HOST", "localhost")
+QDRANT_PORT = int(os.environ.get("QDRANT_PORT", 6333))
 
-# Define collection name and vector parameters
-collection_name = "documents"
-vector_size = 384# Adjust size based on your embeddings
-distance_metric = "Cosine"  # Choose from "euclid", "cosine", or "dot"
+client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+
+# Define collection name and vector parameters (using environment variables)
+COLLECTION_NAME = os.environ.get("QDRANT_COLLECTION_NAME", "documents")
+VECTOR_SIZE = int(os.environ.get("QDRANT_VECTOR_SIZE", 384))  # Adjust based on your embeddings
+
+#Map the string to the Distance Enum.
+DISTANCE_METRIC_STRING = os.environ.get("QDRANT_DISTANCE_METRIC", "Cosine").lower()
+DISTANCE_METRIC = Distance.COSINE
+if(DISTANCE_METRIC_STRING == "euclid"):
+    DISTANCE_METRIC = Distance.EUCLID
+elif(DISTANCE_METRIC_STRING == "dot"):
+    DISTANCE_METRIC = Distance.DOT
 
 # Create the collection
-client.recreate_collection(
-    collection_name=collection_name,
-    vectors_config=VectorParams(size=vector_size, distance=distance_metric),
-)
+try:
+    client.recreate_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),
+    )
+    print(f"Collection '{COLLECTION_NAME}' created/recreated successfully!")
 
-print(f"Collection '{collection_name}' created successfully!")
+except Exception as e:
+    print(f"Error creating/recreating collection '{COLLECTION_NAME}': {e}")
