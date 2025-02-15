@@ -3,7 +3,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
-
+import string  # Import the string module
 
 # Initialize lemmatizer and stopwords
 lemmatizer = WordNetLemmatizer()
@@ -27,15 +27,13 @@ def preprocess_text(text):
     # Process tokens: lemmatize words, keep numbers and special characters
     cleaned_tokens = []
     for token in tokens:
-        if token.isalpha() and token not in stop_words:  # Alphabetic words
-            cleaned_tokens.append(lemmatizer.lemmatize(token))
+        if token.isalpha():  # Alphabetic words
+            if token not in stop_words:
+                cleaned_tokens.append(lemmatizer.lemmatize(token))
         elif token.isnumeric():  # Numbers
             cleaned_tokens.append(token)
-        elif not token.isalnum():  # Special characters
+        elif not token.isalnum() and token not in string.punctuation:  # Special characters (excluding punctuation)
             cleaned_tokens.append(token)
 
     # Join the tokens back into a single string
     return ' '.join(cleaned_tokens)
-
-
-
