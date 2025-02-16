@@ -1,0 +1,9 @@
+def process_txt_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            text = "\n".join([line.strip() for line in file])
+        return text.strip()
+    except FileNotFoundError:
+        return "Error: File not found."
+    except Exception as e:
+        return f"Error: {e}" 
