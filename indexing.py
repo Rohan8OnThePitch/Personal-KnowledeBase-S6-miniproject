@@ -1,8 +1,14 @@
 import uuid
+import re
+import logging
+import nltk
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import VectorParams, Distance
 from sentence_transformers import SentenceTransformer
-import logging
+
+# Download tokenizer for sentence splitting
+nltk.download("punkt")
+from nltk.tokenize import sent_tokenize
 
 # Initialize Qdrant client and model
 qdrant_client = QdrantClient(host="localhost", port=6333)
@@ -12,14 +18,8 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 logging.basicConfig(level=logging.INFO)
 
 def create_collection_if_not_exists(collection_name):
-    """
-    Creates a Qdrant collection if it doesn't already exist.
-    
-    Args:
-        collection_name (str): Name of the collection.
-    """
+    """Creates a Qdrant collection if it doesn't already exist."""
     try:
-        # Check if the collection exists
         collections_response = qdrant_client.get_collections()
         existing_collections = [col.name for col in collections_response.collections]
 
@@ -27,8 +27,8 @@ def create_collection_if_not_exists(collection_name):
             qdrant_client.create_collection(
                 collection_name=collection_name,
                 vectors_config=VectorParams(
-                    size=384,  # Ensure this matches your embedding dimensions
-                    distance=Distance.COSINE  # Use cosine distance for similarity
+                    size=384,  # Ensure this matches embedding dimensions
+                    distance=Distance.COSINE
                 )
             )
             logging.info(f"Collection '{collection_name}' created.")
@@ -38,9 +38,43 @@ def create_collection_if_not_exists(collection_name):
         logging.error(f" Error creating collection '{collection_name}': {e}")
         raise
 
+def split_text_into_chunks(text, max_chunk_size=256):
+    """
+    Splits text into smaller, manageable chunks for indexing.
+    - Uses newline (`\n`) splitting if available.
+    - Falls back to `sent_tokenize()` if necessary.
+    - Splits large chunks further into smaller ones (max 256 tokens).
+    
+    Args:
+        text (str): Full document text.
+        max_chunk_size (int): Maximum token length per chunk.
+    
+    Returns:
+        list: List of properly split chunks.
+    """
+    # Try splitting by newlines if present
+    if "\n" in text:
+        chunks = [s.strip() for s in text.split("\n") if s.strip()]
+    else:
+        # Otherwise, use sentence tokenization
+        chunks = sent_tokenize(text)
+
+    # Ensure chunks are not too large (Break long sentences)
+    final_chunks = []
+    for chunk in chunks:
+        if len(chunk) > max_chunk_size:  
+            # Further split large chunks at punctuation
+            split_sub_chunks = re.split(r'(?<=[.?!])\s+', chunk)  # Split at sentence-ending punctuation
+            final_chunks.extend([s.strip() for s in split_sub_chunks if s.strip()])
+        else:
+            final_chunks.append(chunk)
+
+    logging.info(f" Split document into {len(final_chunks)} chunks.")
+    return final_chunks
+
 def index_document(collection_name, document_id, text, batch_size=100):
     """
-    Indexes document text into Qdrant.
+    Indexes document text into Qdrant with improved chunking.
     
     Args:
         collection_name (str): Name of the collection.
@@ -52,70 +86,43 @@ def index_document(collection_name, document_id, text, batch_size=100):
         dict: Status of the indexing operation.
     """
     try:
-        # Ensure the collection exists
         create_collection_if_not_exists(collection_name)
 
-        # Split text into sentences (Better Handling)
-        if "\n" in text:  
-            # If there are line breaks, split by them
-            chunks = [s.strip() for s in text.split("\n") if s.strip()]
-        else:
-            # Otherwise, use sentence tokenizer
-            import nltk
-            nltk.download("punkt")
-            from nltk.tokenize import sent_tokenize
-            chunks = sent_tokenize(text)
+        # 🔹 Improved chunking logic
+        chunks = split_text_into_chunks(text)
 
-        # Debugging: Print extracted chunks
-        logging.info(f"🔍 Extracted {len(chunks)} chunks from document.")
-        if len(chunks) == 1:
-            logging.warning(f"Only 1 chunk extracted! Text may not be splitting correctly.")
-
-        # Validate input
         if not chunks:
-            logging.warning(" No chunks provided for indexing.")
-            return {"status": "error", "message": "No chunks extracted"}
+            logging.warning(" No valid chunks extracted for indexing.")
+            return {"status": "error", "message": "No valid chunks extracted"}
 
-        # Process chunks in batches
+        # 🔹 Process chunks in batches
         for i in range(0, len(chunks), batch_size):
             batch_chunks = chunks[i:i + batch_size]
-
-            # Generate embeddings for the batch
             embeddings = model.encode(batch_chunks).tolist()
 
-            # Prepare points for Qdrant
             points = []
             for idx, (chunk, embedding) in enumerate(zip(batch_chunks, embeddings)):
-                chunk_id = str(uuid.uuid4())  # Ensure unique ID
+                chunk_id = str(uuid.uuid4())
 
                 payload = {
                     "document_id": document_id,
                     "text": chunk,
                     "chunk_index": i + idx,
-                    "file_name": document_id  # Include additional metadata
+                    "file_name": document_id  
                 }
                 points.append({
-                    "id": chunk_id,  # Use UUID for unique IDs
+                    "id": chunk_id,
                     "vector": embedding,
                     "payload": payload
                 })
 
             # Upsert the batch into Qdrant
-            qdrant_client.upsert(
-                collection_name=collection_name,
-                points=points
-            )
+            qdrant_client.upsert(collection_name=collection_name, points=points)
+            logging.info(f" Indexed batch {i // batch_size + 1} ({len(batch_chunks)} chunks).")
 
-            logging.info(f"Indexed batch {i // batch_size + 1} ({len(batch_chunks)} chunks).")
-
-            # Debugging: Print first 100 chars of each chunk
-            for point in points:
-                logging.info(f" Indexed Chunk: {point['payload']['text'][:100]}...")
-
-        logging.info(f"Successfully indexed {len(chunks)} chunks for document '{document_id}'.")
+        logging.info(f" Successfully indexed {len(chunks)} chunks for document '{document_id}'.")
         return {"status": "success", "chunks": len(chunks)}
 
     except Exception as e:
         logging.error(f"Error indexing document '{document_id}': {e}")
         return {"status": "error", "message": str(e)}
-
