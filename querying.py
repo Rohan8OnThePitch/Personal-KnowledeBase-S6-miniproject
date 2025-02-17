@@ -19,42 +19,41 @@ qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 # Load Sentence Transformer for Query Embeddings
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Load Mistral-7B from Hugging Face
-MISTRAL_MODEL_NAME = "mistralai/Mistral-7B-v0.1"
-tokenizer = AutoTokenizer.from_pretrained(MISTRAL_MODEL_NAME)
-mistral_model = AutoModelForCausalLM.from_pretrained(
-    MISTRAL_MODEL_NAME,
+# Load GPT-2 from Hugging Face
+GPT2_MODEL_NAME = "gpt2"  # You can also use "gpt2-medium", "gpt2-large", "gpt2-xl" for larger versions
+tokenizer = AutoTokenizer.from_pretrained(GPT2_MODEL_NAME)
+gpt2_model = AutoModelForCausalLM.from_pretrained(
+    GPT2_MODEL_NAME,
     torch_dtype=torch.float16,  # Lower memory usage
     device_map="auto"  # Auto-select GPU if available
 )
 
-# Function to Generate Answer Using Mistral-7B
+# Function to Generate Answer Using GPT-2
 def generate_answer(query, context):
-    """Generates a response using Mistral-7B based on the retrieved context."""
+    """Generates a response using GPT-2 based on the retrieved context."""
     if not context.strip():
         return "I couldn't find relevant information."
 
     prompt = f"""
-    [INST] <<SYS>>
-    Answer the question using only the provided context. If unsure, say "I don't know".
-    <</SYS>>
     Context: {context}
+
     Question: {query}
-    [/INST]
+
+    Answer:
     """
 
-    inputs = tokenizer(prompt, return_tensors="pt").to(mistral_model.device)
-    outputs = mistral_model.generate(
+    inputs = tokenizer(prompt, return_tensors="pt").to(gpt2_model.device)
+    outputs = gpt2_model.generate(
         **inputs,
         max_new_tokens=200,
         temperature=0.7,
-        top_p=0.3
+        top_p=0.9
     )
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 # Function to Query Documents from Qdrant
 def query_documents(collection_name, user_query, top_k=5, score_threshold=0.5):
-    """Queries Qdrant, retrieves matching documents, and generates an answer using Mistral-7B."""
+    """Queries Qdrant, retrieves matching documents, and generates an answer using GPT-2."""
     try:
         logging.info(f"🔍 Original Query: {user_query}")
         processed_query = preprocess.preprocess_text(user_query)
@@ -95,10 +94,10 @@ def query_documents(collection_name, user_query, top_k=5, score_threshold=0.5):
         return {"error": str(e)}
 
 # Command-Line Execution
-if __name__ == "__main__":
+if _name_ == "_main_":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Query documents with Mistral-7B LLM")
+    parser = argparse.ArgumentParser(description="Query documents with GPT-2")
     parser.add_argument("--collection", type=str, default="documents", help="Qdrant collection name")
     parser.add_argument("--query", type=str, required=True, help="Your search query")
     parser.add_argument("--top-k", type=int, default=3, help="Number of results to return")
