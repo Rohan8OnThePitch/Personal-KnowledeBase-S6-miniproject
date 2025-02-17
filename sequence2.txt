@@ -1,0 +1,45 @@
+sequenceDiagram
+    participant User
+    participant FlaskApp
+    participant FileProcessor
+    participant Preprocessor
+    participant Indexer
+    participant URLProcessor
+    participant QueryProcessor
+    participant AnswerGenerator
+
+    User->>FlaskApp: Uploads file or URL (POST /upload or POST /process_url)
+    alt No input provided
+        FlaskApp-->>User: 400 Error (No file/URL)
+    else Unsupported file type or invalid URL
+        FlaskApp-->>User: 400 Error (Unsupported type/Invalid URL)
+    else Valid file
+        FlaskApp->>FileProcessor: Routes file
+        FileProcessor->>FileProcessor: Processes file into chunks
+        FileProcessor->>Preprocessor: Sends chunks
+        Preprocessor->>Preprocessor: Preprocesses chunks
+        Preprocessor->>Indexer: Sends preprocessed chunks
+        Indexer->>Indexer: Indexes chunks
+        Indexer-->>FlaskApp: Returns indexing status
+        FlaskApp-->>User: JSON response (success/failure)
+    else Valid URL
+        FlaskApp->>URLProcessor: Routes URL
+        URLProcessor->>URLProcessor: Extracts content
+        URLProcessor->>FileProcessor: Sends extracted data as chunks
+        FileProcessor->>Preprocessor: Sends chunks
+        Preprocessor->>Preprocessor: Preprocesses chunks
+        Preprocessor->>Indexer: Sends preprocessed chunks
+        Indexer->>Indexer: Indexes chunks
+        Indexer-->>FlaskApp: Returns indexing status
+        FlaskApp-->>User: JSON response (success/failure)
+    end
+
+    User->>FlaskApp: Queries data (GET /query?input="...")
+    FlaskApp->>QueryProcessor: Routes query
+    QueryProcessor->>Indexer: Searches indexed data
+    Indexer->>QueryProcessor: Returns relevant data
+    QueryProcessor->>AnswerGenerator: Sends query and relevant data
+    AnswerGenerator->>AnswerGenerator: Generates AI-powered response
+    AnswerGenerator-->>QueryProcessor: Returns response
+    QueryProcessor-->>FlaskApp: Returns final response
+    FlaskApp-->>User: JSON response with answer

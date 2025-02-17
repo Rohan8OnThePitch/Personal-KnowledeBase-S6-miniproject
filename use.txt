@@ -1,0 +1,28 @@
+@startuml
+actor User as "User"
+actor System as "System"
+
+User --> (Upload Files)
+User --> (Upload URLs)
+System --> (Process Data)
+User --> (Query Data)
+(Query Data) --> (Fetch Data)
+(Fetch Data) --> (Prompt for More Input)
+System --> (Fetch Data)
+System --> (Prompt for More Input)
+(Query Data) --> (AI-Powered Answer Generation)
+System --> (AI-Powered Answer Generation)
+System --> (Vector Search and Embeddings)
+System --> (Conversational Memory)
+
+
+
+note right of System
+  AI Features
+  - AI-Powered Answer Generation
+  - Vector Search and Embeddings
+  - Conversational Memory
+  - Create User Space
+  - Manage User Space
+end note
+@enduml

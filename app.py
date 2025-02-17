@@ -53,8 +53,11 @@ def query():
 
     # Optional: Get score_threshold from the request (default to 0.5)
     score_threshold = request.json.get('score_threshold', 0.5)
-    preproquery=preprocess.preprocess_text(query_text)
+    #preproquery=preprocess.preprocess_text(query_text)
+    preproquery=query_text
+
     results = query_documents("documents", preproquery, score_threshold=score_threshold)
+    
     return jsonify(results)
 
 if __name__ == '__main__':

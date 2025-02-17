@@ -1,0 +1,33 @@
+graph TD
+    subgraph Web Layer
+        A["Flask App ('app.py')"]:::web
+    end
+
+    subgraph Core Logic
+        B["File Processor ('documents.py')"]:::core
+        C["Indexing Service ('indexing.py')"]:::core
+        D["Query Engine ('querying.py')"]:::core
+        G["URL Processor ('url_processing.py')"]:::core
+    end
+
+    subgraph Data Storage
+        E["Qdrant Database"]:::data
+    end
+
+    subgraph AI Components
+        F["Mistral-7B LLM"]:::ai
+    end
+
+    A -->|POST /upload → process_docx/pdf/txt| B
+    B -->|preprocessed chunks| C
+    C -->|upsert| E
+    A -->|POST /query → query_documents| D
+    D -->|search| E
+    D -->|generate_answer| F
+
+    A -->|POST /process_url| G
+    G -->|extracted data| B
+    classDef web fill:#FFD700,stroke:#333;
+    classDef core fill:#4B0082,stroke:#333,color:white;
+    classDef data fill:#006400,stroke:#333,color:white;
+    classDef ai fill:#32CD32,stroke:#333;
