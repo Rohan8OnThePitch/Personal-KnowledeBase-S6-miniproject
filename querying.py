@@ -104,13 +104,13 @@ if __name__ == "__main__":
     parser.add_argument("--top-k", type=int, default=3, help="Number of results to return")
     args = parser.parse_args()
 
-    logging.info(f"🔍 Querying for: '{args.query}'")
+    logging.info(f"Querying for: '{args.query}'")
     result = query_documents(args.collection, args.query, args.top_k)
 
     if "error" in result:
         logging.error(f" Error: {result['error']}")
     else:
-        logging.info("\n=== 📝 Generated Answer ===")
+        logging.info("\n===  Generated Answer ===")
         print(result["answer"])
 
         logging.info("\n===  Relevant Chunks ===")
