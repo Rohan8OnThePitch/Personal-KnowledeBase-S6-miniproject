@@ -168,7 +168,7 @@ def query_documents(collection_name, user_query, top_k=5, score_threshold=0.3): 
         logging.error(f"Error during query: {e}")
         return {"error": f"An error occurred: {str(e)}"}
 
-if _name_ == "main":
+if __name__ == "_main_":
     import argparse
 
     parser = argparse.ArgumentParser(description="Query documents with GPT-2")
