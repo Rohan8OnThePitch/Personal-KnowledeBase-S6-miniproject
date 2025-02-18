@@ -46,8 +46,8 @@ def process_and_query(file, query_text):
     else:
         return "Unsupported file type", []
     preprocessed_text = preprocess.preprocess_text(text['text'])
-    print (preprocessed_text) #ADD THIS
-
+    #print (preprocessed_text) #ADD THIS
+    #preprocessed_text =(text['text'])
     # Index the document
     index_result = index_document("documents", file.name, preprocessed_text)
 
