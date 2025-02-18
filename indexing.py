@@ -41,13 +41,8 @@ def create_collection_if_not_exists(collection_name):
 def split_text_into_chunks(text, max_chunk_size=256):
     """
     Splits text into smaller, manageable chunks for indexing.
-<<<<<<< HEAD
     - Uses newline (`\n`) splitting if available.
     - Falls back to `sent_tokenize()` if necessary.
-=======
-    - Uses newline (\n) splitting if available.
-    - Falls back to sent_tokenize() if necessary.
->>>>>>> 4a3279a (Added updated files)
     - Splits large chunks further into smaller ones (max 256 tokens).
     
     Args:
