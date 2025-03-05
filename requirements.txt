@@ -1,6 +1,0 @@
-flask
-python-docx
-PyPDF2
-sentence-transformers
-gradio
-nltk
