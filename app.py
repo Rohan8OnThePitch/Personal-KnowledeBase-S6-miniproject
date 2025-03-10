@@ -1,103 +1,98 @@
 import streamlit as st
-from memory_manager import store_message, retrieve_messages
+import os
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from document_loader import load_and_chunk_documents_with_multiple_strategies
-from qdrant_helper import index_document_with_strategies, query_qdrant_multi_strategy,hybrid_search
-from rag import generate_answer
+from qdrant_helper import index_document_with_strategies
 
-SESSION_ID = "user_session"
-COLLECTION_NAME = "document_chunks"
-
-# Initialize session state if not present
-if "messages" not in st.session_state:
-    st.session_state.messages = retrieve_messages(SESSION_ID)
-
-if "last_retrieved_chunks" not in st.session_state:
-    st.session_state.last_retrieved_chunks = []
-
-# Add sidebar for document upload
-st.sidebar.header("Upload Documents")
-uploaded_files = st.sidebar.file_uploader(
-    "Choose your documents (PDF, DOCX, TXT)", 
-    type=["pdf", "docx", "txt"], 
-    accept_multiple_files=True
+from memory_manager import (
+    retrieve_context_relevant_messages,
+    get_all_session_messages,
+    store_message,
+    format_context_messages
 )
 
-# Handle file uploads
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        st.sidebar.write(f"**{uploaded_file.name}**")
-        if st.sidebar.button(f"Upload {uploaded_file.name}"):
+from conversation_aware_rag import (
+    answer_query_with_conversation_context,
+    create_context_message
+)
+
+# Constants
+SESSION_ID = "user_session"
+DOCUMENT_COLLECTION = "document_chunks"
+
+# Initialize session state
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        SystemMessage(content="Welcome! I'm your RAG assistant. Upload documents or ask questions.")
+    ]
+    store_message(SESSION_ID, st.session_state.messages[0].content, "system")
+
+if "last_retrieved_sources" not in st.session_state:
+    st.session_state.last_retrieved_sources = []
+
+if "use_conversation_memory" not in st.session_state:
+    st.session_state.use_conversation_memory = True
+
+# Default weights (hidden from UI)
+document_weight = 0.7
+conversation_weight = 0.3
+
+# App title
+st.title("📚 Conversation-Aware RAG System")
+
+# Settings sidebar
+with st.sidebar:
+    st.header("📄 Upload Documents")
+    uploaded_files = st.file_uploader("Choose documents", type=["pdf", "docx", "txt"], accept_multiple_files=True)
+    
+    if uploaded_files:
+        os.makedirs("uploads", exist_ok=True)
+        for uploaded_file in uploaded_files:
             file_path = f"uploads/{uploaded_file.name}"
             with open(file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
-            st.sidebar.write(f"✅ Saved {uploaded_file.name}")
-            chunks = load_and_chunk_documents_with_multiple_strategies(file_path)
-            response = index_document_with_strategies(COLLECTION_NAME, uploaded_file.name, chunks)
-            if response["status"] == "success":
-                st.sidebar.success(f"Indexed {len(chunks)} chunks for {uploaded_file.name}")
-            else:
-                st.sidebar.error(f"Failed to index {uploaded_file.name}: {response['message']}")
+            with st.spinner(f"Processing {uploaded_file.name}..."):
+                chunks = load_and_chunk_documents_with_multiple_strategies(file_path)
+                response = index_document_with_strategies(DOCUMENT_COLLECTION, uploaded_file.name, chunks)
+                if response["status"] == "success":
+                    st.success(f"✅ Indexed {sum(len(v) for v in chunks.values())} chunks")
+                else:
+                    st.error(f"❌ Failed: {response['message']}")
 
-# Left sidebar for showing sources
-with st.sidebar:
-    st.header("Sources")
-    if st.session_state.last_retrieved_chunks:
-        for i, chunk in enumerate(st.session_state.last_retrieved_chunks):
-            source = chunk["metadata"].get("source", "Unknown Source")
-            score = chunk.get("score", "N/A")
-            with st.expander(f"Source {i+1} (Score: {score:.2f}) - {source}"):
-                st.write(chunk["text"])
-    else:
-        st.write("No sources to display. Ask a question to see relevant sources.")
+# Display chat messages
+for message in st.session_state.messages:
+    with st.chat_message("user" if isinstance(message, HumanMessage) else "assistant"):
+        st.write(message.content)
 
-# Collapsible Chat History
-with st.sidebar:
-    st.header("Chat History")
-    if st.button("Show Chat History"):
-        with st.expander("Chat History", expanded=True):
-            for message in st.session_state.messages:
-                if isinstance(message, HumanMessage):
-                    st.markdown(f"**User:** {message.content}")
-                elif isinstance(message, AIMessage):
-                    st.markdown(f"**Assistant:** {message.content}")
-
-# Chat input for user query
+# Chat input
 query = st.chat_input("Ask a question about your documents...")
-
 if query:
-    st.session_state.messages.append(HumanMessage(content=query))
-    store_message(SESSION_ID, query, "user")
-    
     with st.chat_message("user"):
         st.write(query)
     
+    st.session_state.messages.append(HumanMessage(content=query))
+    store_message(SESSION_ID, query, "user")
+    
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            #retrieved_chunks = query_qdrant_multi_strategy(COLLECTION_NAME, query)
-            retrieved_chunks = hybrid_search(COLLECTION_NAME, query)
+            response = answer_query_with_conversation_context(
+                session_id=SESSION_ID,
+                query=query,
+                use_conversation_memory=st.session_state.use_conversation_memory,
+                conversation_weight=conversation_weight,
+                document_weight=document_weight
+            )
             
-            if retrieved_chunks:
-                st.session_state.last_retrieved_chunks = retrieved_chunks  # Store for sidebar
-                unique_contexts = list({chunk["text"] for chunk in retrieved_chunks})  # Set removes duplicates
-                combined_context = " ".join(unique_contexts)
-                answer = generate_answer(query, combined_context)
-                
-                context_message = SystemMessage(content=f"Use the following context to answer the question:\n{combined_context}")
-                st.session_state.messages.append(context_message)
-                st.session_state.messages.append(AIMessage(content=answer))
-                st.write(answer)
-                store_message(SESSION_ID, answer, "assistant")
+            st.session_state.last_retrieved_sources = response.get("sources", [])
+            if response.get("sources"):
+                st.session_state.messages.append(create_context_message(response["sources"]))
             
-            else:
-                no_info_msg = "I don't have enough information to answer that question. Please try a different question or upload relevant documents."
-                st.write(no_info_msg)
-                st.session_state.messages.append(AIMessage(content=no_info_msg))
-                store_message(SESSION_ID, no_info_msg, "assistant")
+            st.write(response["answer"])
+            st.session_state.messages.append(AIMessage(content=response["answer"]))
+            store_message(SESSION_ID, response["answer"], "assistant")
 
-# Button to clear chat history and sources
+# Clear chat history
 if st.button("Clear Chat History"):
-    st.session_state.messages = [
-        SystemMessage(content="I am a helpful AI assistant that can answer questions about your documents.")
-    ]
-    st.session_state.last_retrieved_chunks = []  # Clear sources
+    st.session_state.messages = [SystemMessage(content="Welcome! I'm your RAG assistant. Upload documents or ask questions.")]
+    st.session_state.last_retrieved_sources = []
+    st.experimental_rerun()
